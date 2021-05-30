@@ -1412,6 +1412,21 @@ void MFRC522::PICC_DumpToSerial(Uid *uid	///< Pointer to Uid struct returned fro
 	PICC_HaltA(); // Already done if it was a MIFARE Classic PICC.
 } // End PICC_DumpToSerial()
 
+/*
+	Print Card UID
+*/
+
+void MFRC522::PICC_PrintUID(Uid* uid) {
+	for (byte i = 0; i < uid->size; i++) {
+		if (uid->uidByte[i] < 0x10)
+			Serial.print(F(" 0"));
+		else
+			Serial.print(F(" "));
+		Serial.print(uid->uidByte[i], HEX);
+	}
+	Serial.println();
+}
+
 /**
  * Dumps card info (UID,SAK,Type) about the selected PICC to Serial.
  */
@@ -1717,7 +1732,7 @@ bool MFRC522::MIFARE_OpenUidBackdoor(bool logErrors) {
 	byte validBits = 7; /* Our command is only 7 bits. After receiving card response,
 						  this will contain amount of valid response bits. */
 	byte response[32]; // Card's response is written here
-	byte received = sizeof(response);
+	byte received;
 	MFRC522::StatusCode status = PCD_TransceiveData(&cmd, (byte)1, response, &received, &validBits, (byte)0, false); // 40
 	if(status != STATUS_OK) {
 		if(logErrors) {
